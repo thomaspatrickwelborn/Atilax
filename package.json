@@ -1,6 +1,6 @@
 {
   "name": "atilax",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Early Bird Gets The Wormhole",
   "homepage": "https://github.com/thomaspatrickwelborn/atilax#readme",
   "bugs": {
@@ -13,8 +13,22 @@
   "license": "ISC",
   "author": "Thomas Patrick Welborn",
   "type": "module",
-  "main": "index.js",
+  "exports": {
+    ".": "./distributement/atilax.js",
+    "./development": "./development/index.js",
+    "./distributement/atilax.js": "./distributement/atilax.js",
+    "./distributement/atilax.js.map": "./distributement/atilax.js.map"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+    "demonstrate:start": "concurrently \"npm run start --workspace development\" \"npm run start --workspace demonstrament\"",
+    "demonstrate:restart": "concurrently \"npm run restart --workspace development\" \"npm run restart --workspace demonstrament\"",
+    "demonstrate:stop": "concurrently \"npm run stop --workspace development\" \"npm run stop --workspace demonstrament\"",
+    "demonstrate:delete": "concurrently \"npm run delete --workspace development\" \"npm run delete --workspace demonstrament\"",
+    "develop:start": "npm run start --workspace development",
+    "develop:restart": "npm run restart --workspace development",
+    "develop:stop": "npm run stop --workspace development",
+    "develop:delete": "npm run delete --workspace development",
+    "distribute": "npm run distribute --workspace development"
+  },
+  "workspaces": ["development", "demonstrament"]
 }
