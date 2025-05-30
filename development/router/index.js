@@ -1,10 +1,11 @@
 import Route from '../route/index.js'
+const Options = {}
 export default class LocalStorageRouter extends EventTarget {
   #options = {}
   #routes = {}
   constructor($routes = {}, $options) {
     super()
-    Object.assign(this.#options, $options)
+    this.#options = Object.assign({}, Options, $options)
     this.addRoutes($routes)
   }
   addRoutes($routes, $options) {
