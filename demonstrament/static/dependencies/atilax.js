@@ -110,12 +110,7 @@ function getOwnPropertyDescriptors($properties, $options) {
 }
 
 var Options$2 = {
-  configurable: false,
-  enumerable: false,
-  frozen: false,
-  sealed: false,
   typeCoercion: false,
-  writable: false,
 };
 
 function defineProperty($target, $propertyKey, $propertyDescriptor, $options) {
