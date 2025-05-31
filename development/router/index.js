@@ -2,7 +2,7 @@ import Route from '../route/index.js'
 export default class LocalStorageRouter extends EventTarget {
   #options = {}
   #routes = {}
-  constructor($routes, $options) {
+  constructor($routes = {}, $options) {
     super()
     Object.assign(this.#options, $options)
     this.addRoutes($routes)
@@ -25,4 +25,5 @@ export default class LocalStorageRouter extends EventTarget {
     }
     return routes
   }
+  clear() { localStorage.clear() }
 }
