@@ -18,6 +18,6 @@
     "rollup": "^4.34.8"
   },
   "dependencies": {
-    "recourse": "^1.1.0"
+    "recourse": "^1.1.1"
   }
 }

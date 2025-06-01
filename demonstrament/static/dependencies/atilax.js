@@ -60,14 +60,34 @@ var isArrayLike = ($source) => {
   return isArrayLike
 };
 
-var Settings = {
-  depth: 0,
-  path: null,
-  ancestors: [],
-};
+function assign($target, ...$sources) {
+  if(!$target) { return $target}
+  iterateSources: 
+  for(const $source of $sources) {
+    if(!$source) continue iterateSources
+    for(const [
+      $sourcePropertyKey, $sourcePropertyValue
+    ] of Object.entries($source)) {
+      const typeOfTargetPropertyValue = typeOf($target[$sourcePropertyKey]);
+      const typeOfSourcePropertyValue = typeOf($sourcePropertyValue);
+      if(
+        typeOfTargetPropertyValue === 'object' &&
+        typeOfSourcePropertyValue === 'object'
+      ) {
+        $target[$sourcePropertyKey] = assign($target[$sourcePropertyKey], $sourcePropertyValue);
+      }
+      else {
+        $target[$sourcePropertyKey] = $sourcePropertyValue;
+      }
+    }
+  }
+  return $target
+}
 
-var Options$1 = {
+var Options$1$1 = {
+  ancestors: [],
   delimiter: '.',
+  depth: 0,
   frozen: false,
   maxDepth: 10,
   nonenumerable: true,
@@ -77,7 +97,7 @@ var Options$1 = {
 };
 
 function getOwnPropertyDescriptor($properties, $propertyKey, $options) {
-  const options = Object.assign({}, Settings, Options$1, $options, {
+  const options = Object.assign({}, Options$1$1, $options, {
     ancestors: Object.assign([], $options.ancestors)
   });
   const propertyDescriptor = Object.getOwnPropertyDescriptor($properties, $propertyKey);
@@ -99,7 +119,7 @@ function getOwnPropertyDescriptor($properties, $propertyKey, $options) {
 
 function getOwnPropertyDescriptors($properties, $options) {
   const propertyDescriptors = {};
-  const options = Object.assign({}, Settings, Options$1, $options);
+  const options = Object.assign({}, Options$1$1, $options);
   if(options.depth >= options.maxDepth) { return propertyDescriptors }
   else { options.depth++; }
   for(const [$propertyKey, $propertyDescriptor] of Object.entries(Object.getOwnPropertyDescriptors($properties))) {
@@ -146,73 +166,104 @@ function defineProperties($target, $propertyDescriptors, $options) {
   return $target
 }
 
-var Options = ($options) => Object.assign({
+var Options$1 = ($options) => assign({
   basename: '',
-  delimiter: '.',
-  frozen: false,
-  maxDepth: 10,
-  nonenumerable: true,
-  path: false,
-  sealed: false,
-  type: false,
+  propertyDescriptors: false,
+  defineProperties: {
+    typeCoercion: true,
+  },
+  replacers: [function replacer($key, $value) {
+    if(typeOf($value) === 'bigint') { return String($value) }
+    else { return $value }
+  }],
+  revivers: [function reviver($key, $value) { return $value }],
 }, $options);
 
+function JSONMiddlewares($middlewares, $key, $value) {
+  let value = $value;
+  for(const $middleware of $middlewares) {
+    value = $middleware($key, $value);
+  }
+  return value
+}
 class LocalStorageRoute extends EventTarget {
-  #options
-  #db = localStorage
-  #path
   constructor($path, $options) {
     super();
-    if(!$path) return
-    this.#path = $path;
-    this.#options = Options($options);
+    if(!$path) return null
+    const options = Options$1($options);
+    const db = localStorage;
+    Object.defineProperties(this, {
+      'path': { value: $path },
+      'raw': { value: function raw() { return db.getItem(this.path) } },
+      'get': { value: function get() {
+        let model = db.getItem(this.path);
+        if(['undefined', undefined].includes(model)) { return }
+        const modelParsement = JSON.parse(model, JSONMiddlewares.bind(null, options.revivers));
+        if(model) {
+          const modelTypedObjectLiteral = typedObjectLiteral(modelParsement);
+          if(options.propertyDescriptors) {
+            model = defineProperties(modelTypedObjectLiteral, modelParsement, options.defineProperties);
+          }
+          else {
+            model = modelParsement;
+          }
+        }
+        return model
+      } },
+      'set': { value: function set($data) {
+        if(options.propertyDescriptors) {
+          return db.setItem(this.path, JSON.stringify(
+            getOwnPropertyDescriptors($data, options.propertyDescriptors), JSONMiddlewares.bind(null, options.replacers)
+          ))
+        }
+        else {
+          return db.setItem(this.path, JSON.stringify($data, JSONMiddlewares.bind(null, options.replacers)))
+        }
+      } },
+      'remove': { value: function remove() { return db.removeItem(this.path) } },
+    });
   }
-  get path() { return this.#path }
-  get() {
-    let model = this.#db.getItem(this.path);
-    if(model) {
-      const modelParsement = JSON.parse(model);
-      const modelTypedObjectLiteral = typedObjectLiteral(modelParsement);
-      model = defineProperties(modelTypedObjectLiteral, modelParsement, this.#options);
-    }
-    return model
-  }
-  set($data) { return this.#db.setItem(this.path, JSON.stringify(
-    getOwnPropertyDescriptors($data, {
-      path: true,
-      type: true,
-    })
-  )) }
-  remove() { return this.#db.removeItem(this.path) }
 }
 
+const Options = {};
 class LocalStorageRouter extends EventTarget {
-  #options = {}
-  #routes = {}
   constructor($routes = {}, $options) {
     super();
-    Object.assign(this.#options, $options);
+    Object.assign({}, Options, $options);
+    const routes = {};
+    const db = localStorage;
+    Object.defineProperties(this, {
+      'addRoute': { value: function addRoute($routePath, $routeOptions) {
+        routes[$routePath] = new LocalStorageRoute($routePath, $routeOptions);
+      } },
+      'addRoutes': { value: function addRoutes($routes, $options) {
+        for(const [$routePath, $routeOptions] of Object.entries($routes)) {
+          this.addRoute($routePath, $routeOptions);
+        }
+      } },
+      'removeRoute': { value: function removeRoute($routePath) {
+        delete routes[$routePath];
+      } }, 
+      'removeRoutes': { value: function removeRoutes($routes) {
+        for(const $routePath of $routes) {
+          this.removeRoute($routePath);
+        }
+      } },
+      'getRoute': { value: function getRoute($path) {
+        return routes[$path]
+      } },
+      'getRoutes': { value: function getRoutes($paths) {
+        if(!$paths) { return routes }
+        const getRoutes = {};
+        for(const $path of [].concat($paths)) {
+          getRoutes[$path] = this.getRoute($path);
+        }
+        return getRoutes
+      } },
+      'clear': { value: function clear() { db.clear(); } },
+    });
     this.addRoutes($routes);
   }
-  addRoutes($routes, $options) {
-    for(const [$routePath, $routeOptions] of Object.entries($routes)) {
-      this.#routes[$routePath] = new LocalStorageRoute($routePath, $routeOptions);
-    }
-  }
-  removeRoutes($routes) {
-    for(const $routePath of $routes) {
-      delete this.#routes[$routePath];
-    }
-  }
-  getRoutes($paths) {
-    if(!$paths) { return this.#routes }
-    const routes = {};
-    for(const $path of [].concat($paths)) {
-      routes[$path] = this.#routes[$path];
-    }
-    return routes
-  }
-  clear() { localStorage.clear(); }
 }
 
 export { LocalStorageRoute as Route, LocalStorageRouter as Router };

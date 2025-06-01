@@ -1,3 +1,1 @@
-export default ($options) => Object.assign({
-  basename: '',
-}, $options)
+export default ($options) => Object.assign({}, $options)

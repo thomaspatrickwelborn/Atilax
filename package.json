@@ -1,6 +1,6 @@
 {
   "name": "atilax",
-  "version": "1.1.0",
+  "version": "1.2.1",
   "description": "Early Bird Gets The Wormhole",
   "homepage": "https://github.com/thomaspatrickwelborn/atilax#readme",
   "bugs": {
@@ -30,5 +30,8 @@
     "develop:delete": "npm run delete --workspace development",
     "distribute": "npm run distribute --workspace development"
   },
-  "workspaces": ["development", "demonstrament"]
+  "workspaces": [
+    "development",
+    "demonstrament"
+  ]
 }

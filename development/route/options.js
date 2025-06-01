@@ -1,10 +1,13 @@
-export default ($options) => Object.assign({
+import { assign, typeOf } from 'recourse'
+export default ($options) => assign({
   basename: '',
-  delimiter: '.',
-  frozen: false,
-  maxDepth: 10,
-  nonenumerable: true,
-  path: false,
-  sealed: false,
-  type: false,
+  propertyDescriptors: false,
+  defineProperties: {
+    typeCoercion: true,
+  },
+  replacers: [function replacer($key, $value) {
+    if(typeOf($value) === 'bigint') { return String($value) }
+    else { return $value }
+  }],
+  revivers: [function reviver($key, $value) { return $value }],
 }, $options)
