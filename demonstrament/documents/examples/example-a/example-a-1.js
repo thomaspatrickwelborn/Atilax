@@ -1,16 +1,17 @@
 console.log("---------------------")
 console.log("Atilax | Example A.1.")
 console.log("---------------------")
-import { Route } from '/dependencies/atilax.js'
-const route = new Route('/', {
-  propertyDescriptors: { type: true, frozen: false, sealed: false, path: false }
-})
-route.set({
+import { Route as LocalStorageRoute } from '/dependencies/atilax.js'
+const object = {
   propertyA: {
     propertyB: {
-      propertyC: BigInt(33135154333333333333333125135)
+      propertyC: BigInt(9007199254740991)
     }
   }
+}
+const localStorageRoute = new LocalStorageRoute('/', {
+  propertyDescriptors: { type: true }
 })
-console.log(route.raw())
-console.log(route.get())
+localStorageRoute.set(object)
+console.log("localStorageRoute.raw()", localStorageRoute.raw())
+console.log("localStorageRoute.get()", localStorageRoute.get())

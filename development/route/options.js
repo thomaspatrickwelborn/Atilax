@@ -1,13 +1,17 @@
 import { assign, typeOf } from 'recourse'
-export default ($options) => assign({
-  basename: '',
-  propertyDescriptors: false,
-  defineProperties: {
-    typeCoercion: true,
-  },
-  replacers: [function replacer($key, $value) {
-    if(typeOf($value) === 'bigint') { return String($value) }
-    else { return $value }
-  }],
-  revivers: [function reviver($key, $value) { return $value }],
-}, $options)
+export default ($options) => {
+  const options = assign({
+    basename: '',
+    propertyDescriptors: false,
+    defineProperties: false,
+    replacers: [],
+    revivers: [],
+  }, $options)
+  if(options.propertyDescriptors?.type) {
+    options.replacers.push(function replacer($key, $value) {
+      if(typeOf($value) === 'bigint') { return String($value) }
+      else { return $value }
+    })
+  }
+  return options
+}

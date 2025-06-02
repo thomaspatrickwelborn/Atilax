@@ -1,6 +1,6 @@
 {
   "name": "atilax",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Early Bird Gets The Wormhole",
   "homepage": "https://github.com/thomaspatrickwelborn/atilax#readme",
   "bugs": {
@@ -33,5 +33,13 @@
   "workspaces": [
     "development",
     "demonstrament"
+  ],
+  "keywords": [
+    "localstorage router",
+    "json serializer/deserializer",
+    "localstorage serializer",
+    "localstorage deserializer",
+    "serialize/deserialize bigint json",
+    "store bigint json"
   ]
 }
