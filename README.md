@@ -1,17 +1,59 @@
 # ⇄&ensp;Atilax
 Localstorage router serializes/deserializes pathed object/array properties.  
+ - Store property descriptor `enumerable`, `configurable`, `writable`, `value` settings.  
+ - Store typed `string`, `number`, `boolean`, `bigint`, `array`, `object`. 
+ - Store property `path` and `frozen`, `sealed` property states. 
 
-> [!WARNING]  
-> Early Stage Development  
+[**Router**](./document/router.md) | [**Route**](./document/route.md) |
+| :-- | :-- |
 
-> [!CAUTION]  
-> Use At Own Risk  
+## Illustration A
+```
+const array = [{
+  propertyB: {
+    propertyC: 333,
+  },
+}, {
+  propertyB: {
+    propertyC: 333333,
+  },
+}, {
+  propertyB: {
+    propertyC: 333333333,
+  },
+}]
+const localStorageRoute = new LocalStorageRoute('/illustration-a')
+localStorageRoute.set(array)
+console.log("localStorageRoute.raw()", localStorageRoute.raw())
+console.log("localStorageRoute.get()", localStorageRoute.get())
+```
+`localStorageRoute.raw()`  
+```
+[{"propertyB":{"propertyC":333}},{"propertyB":{"propertyC":333333}},{"propertyB":{"propertyC":333333333}}]
+```
 
-> [!NOTE]  
-> Interested in Atilax? 
-> thomas.patrick.welborn@outlook.com
+`localStorageRoute.get()`  
+```
+[
+  {
+    "propertyB": {
+      "propertyC": 333
+    }
+  },
+  {
+    "propertyB": {
+      "propertyC": 333333
+    }
+  },
+  {
+    "propertyB": {
+      "propertyC": 333333333
+    }
+  }
+]
+```
 
-
+## Illustration B
 ```
 import { Route as LocalStorageRoute } from 'atilax'
 const object = {
@@ -21,7 +63,7 @@ const object = {
     }
   }
 }
-const localStorageRoute = new LocalStorageRoute('/', {
+const localStorageRoute = new LocalStorageRoute('/illustration-b', {
   propertyDescriptors: { type: true }
 })
 localStorageRoute.set(object)

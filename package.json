@@ -1,7 +1,7 @@
 {
   "name": "atilax",
-  "version": "1.2.2",
-  "description": "Early Bird Gets The Wormhole",
+  "version": "1.2.3",
+  "description": "Localstorage router serializes/deserializes pathed object/array properties.\n\nStore property descriptor enumerable, configurable, writable, value settings.\nStore typed string, number, boolean, bigint, array, object.\nStore property path and frozen, sealed property states.\n",
   "homepage": "https://github.com/thomaspatrickwelborn/atilax#readme",
   "bugs": {
     "url": "https://github.com/thomaspatrickwelborn/atilax/issues"
